@@ -1,20 +1,26 @@
-# box.toml — Runbox environment declaration
-# https://github.com/dominionthedev/runbox
+schema_version = 1
 
 [box]
 name = "site"
-version = "1"
+lifecycle = "persistent"
+interactive = true
+shell = "/bin/zsh"
 
-[tools]
-node = ">=20.0"
+[network]
+mode = "deny"
+allowlist = ["registry.npmjs.org:443", "github.com:443"]
+dns = "localhost-only"
 
-[shell]
-mode = "isolated"
+[permissions]
+read = ["/Users/appleplay/.local", "/opt/local", "/usr/local/bin"]
+write = []
 
-[isolation]
-mode = "normal"
-binary_strategy = "hybrid"
-
-[sandbox]
-level = "weak"
-network = true
+[env]
+path_extra = [
+  "/opt/local/bin",
+  "/opt/local/sbin",
+  "/usr/local/bin",
+  "/Users/appleplay/.local/bin",
+  "/Users/appleplay/.local/share/nvm/versions/node/v22.23.2/bin",
+]
+set = { NVM_DIR = "/Users/appleplay/.local/share/nvm" }
