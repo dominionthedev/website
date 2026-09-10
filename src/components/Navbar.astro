@@ -10,6 +10,7 @@ const navItems = [
 <nav class="navbar">
   <button class="navbar-title" id="navTitle" data-typed data-typed-text="DOMINIONDEV" aria-label="Home"></button>
   <div class="navbar-links" id="navLinks">
+    <span class="navbar-indicator" id="navIndicator" aria-hidden="true">--</span>
     {
       navItems.map((item) => (
         <button class="navbar-link" data-goto={item.id}>
@@ -36,7 +37,7 @@ const navItems = [
   }
 
   .navbar.is-settled {
-    border-bottom-color: oklch(55% 0.02 295 / 0.2);
+    border-bottom-color: var(--c-ghost);
   }
 
   .navbar-title {
@@ -51,7 +52,7 @@ const navItems = [
     font-weight: 800;
     font-size: clamp(2.25rem, 5.5vw, 3.5rem);
     letter-spacing: 0.04em;
-    color: var(--color-signal);
+    color: var(--c-ink);
     white-space: nowrap;
     z-index: 41;
     transition: top 260ms cubic-bezier(0.3, 0.9, 0.3, 1), left 260ms cubic-bezier(0.3, 0.9, 0.3, 1),
@@ -73,18 +74,38 @@ const navItems = [
 
   @keyframes navbar-glitch {
     0% { text-shadow: none; opacity: 1; }
-    12% { text-shadow: -3px 0 var(--color-pulse), 3px 0 var(--color-phosphor); opacity: 0.75; }
-    24% { text-shadow: 2px 0 var(--color-pulse), -2px 0 var(--color-phosphor); opacity: 1; }
+    12% { text-shadow: -3px 0 var(--c-magenta), 3px 0 var(--c-green); opacity: 0.75; }
+    24% { text-shadow: 2px 0 var(--c-magenta), -2px 0 var(--c-green); opacity: 1; }
     36% { text-shadow: none; }
-    48% { text-shadow: -2px 0 var(--color-phosphor), 2px 0 var(--color-pulse); opacity: 0.8; }
+    48% { text-shadow: -2px 0 var(--c-green), 2px 0 var(--c-magenta); opacity: 0.8; }
     60% { text-shadow: none; opacity: 1; }
-    75% { text-shadow: 1px 0 var(--color-pulse), -1px 0 var(--color-phosphor); }
+    75% { text-shadow: 1px 0 var(--c-magenta), -1px 0 var(--c-green); }
     100% { text-shadow: none; opacity: 1; }
   }
 
   .navbar-links {
+    position: relative;
+    flex: 1;
     display: flex;
-    gap: var(--space-6);
+    justify-content: space-evenly;
+    margin-left: var(--space-16);
+  }
+
+  .navbar-indicator {
+    position: absolute;
+    top: -6px;
+    left: 0;
+    font-size: 0.7rem;
+    line-height: 1;
+    color: var(--c-green);
+    text-shadow: var(--glow-green);
+    opacity: 0;
+    transition: left var(--duration-base) var(--ease-smooth),
+      opacity var(--duration-fast) linear;
+  }
+
+  .navbar-indicator.is-visible {
+    opacity: 1;
   }
 
   .navbar-link {
@@ -95,7 +116,7 @@ const navItems = [
     font-size: var(--text-label);
     letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
-    color: var(--color-static);
+    color: var(--c-mute);
     opacity: 0;
     transform: translateX(-8px);
     transition: opacity var(--duration-base) var(--ease-smooth),
@@ -108,7 +129,7 @@ const navItems = [
   }
 
   .navbar-link:hover {
-    color: var(--color-signal);
+    color: var(--c-ink);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -119,7 +140,7 @@ const navItems = [
 
   @media (max-width: 768px) {
     .navbar-links {
-      gap: var(--space-3);
+      margin-left: var(--space-4);
     }
     .navbar-link {
       font-size: 0.65rem;
@@ -164,8 +185,28 @@ const navItems = [
     for (const link of links) {
       link.classList.add("is-visible");
       await wait(80);
-      colorSlide(link, { color: "var(--color-phosphor)", speed: 18 });
+      colorSlide(link, { color: "var(--c-green)", speed: 18 });
     }
+  }
+
+  function updateIndicator(activeId: string | undefined) {
+    const indicator = document.getElementById("navIndicator");
+    const links = document.getElementById("navLinks");
+    if (!indicator || !links) return;
+
+    const btn = activeId
+      ? links.querySelector<HTMLElement>(`[data-goto="${activeId}"]`)
+      : null;
+
+    if (!btn) {
+      indicator.classList.remove("is-visible");
+      return;
+    }
+    const linksRect = links.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    const center = btnRect.left - linksRect.left + btnRect.width / 2;
+    indicator.style.left = `${center - indicator.offsetWidth / 2}px`;
+    indicator.classList.add("is-visible");
   }
 
   function initNavbar() {
@@ -176,6 +217,14 @@ const navItems = [
       btn.addEventListener("click", () => {
         window.dispatchEvent(new CustomEvent("stage:goto", { detail: { id: btn.dataset.goto } }));
       });
+    });
+
+    window.addEventListener("stage:changed", ((e: CustomEvent) => {
+      updateIndicator(e.detail?.id);
+    }) as EventListener);
+    window.addEventListener("resize", () => {
+      const current = document.body.dataset.stage;
+      updateIndicator(current);
     });
 
     const overlay = document.querySelector<HTMLElement>("[data-boot-overlay]");

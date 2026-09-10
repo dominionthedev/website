@@ -78,7 +78,7 @@ export function colorSlide(
   el: HTMLElement,
   opts: { color?: string; speed?: number } = {}
 ): Promise<void> {
-  const color = opts.color ?? "var(--color-phosphor)";
+  const color = opts.color ?? "var(--c-green)";
   const speed = opts.speed ?? 28;
   const text = el.textContent ?? "";
   const chars = text.split("");
