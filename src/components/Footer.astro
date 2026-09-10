@@ -1,0 +1,50 @@
+---
+---
+
+<footer class="site-footer">
+  <span>site@dominiondev</span>
+  <span id="footerStatus">0% • tty</span>
+</footer>
+
+<style>
+  .site-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-8);
+    border-top: 1px solid oklch(55% 0.02 295 / 0.2);
+    font-family: var(--font);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--color-static);
+    background: oklch(15% 0.03 295 / 0.6);
+    backdrop-filter: blur(4px);
+  }
+
+  @media (max-width: 768px) {
+    .site-footer {
+      padding: var(--space-2) var(--space-4);
+    }
+  }
+</style>
+
+<script>
+  function initFooter() {
+    const status = document.getElementById("footerStatus");
+    if (!status) return;
+    window.addEventListener("stage:changed", ((e: CustomEvent) => {
+      const pct = Math.round(((e.detail.index + 1) / e.detail.total) * 100);
+      status.textContent = `${pct}% • tty`;
+    }) as EventListener);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initFooter);
+  } else {
+    initFooter();
+  }
+</script>

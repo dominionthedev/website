@@ -1,0 +1,101 @@
+---
+type Tier = "shipped" | "in-progress";
+
+interface Project {
+  name: string;
+  url: string;
+  tier: Tier;
+}
+
+const projects: Project[] = [
+  { name: "RunBox", url: "https://github.com/dominionthedev/runbox", tier: "shipped" },
+  { name: "Finite", url: "https://github.com/dominionthedev/finite", tier: "shipped" },
+  { name: "Loom", url: "https://github.com/dominionthedev/loom", tier: "shipped" },
+  { name: "lean", url: "https://github.com/dominionthedev/lean", tier: "shipped" },
+  { name: "alfig", url: "https://github.com/dominionthedev/alfig", tier: "shipped" },
+  { name: "OllaCloud", url: "https://github.com/dominionthedev/ollacloud", tier: "shipped" },
+  { name: "panewatch", url: "https://github.com/dominionthedev/panewatch", tier: "shipped" },
+  { name: "aether", url: "https://github.com/dominionthedev/aether", tier: "shipped" },
+  { name: "sheme", url: "https://github.com/dominionthedev/sheme", tier: "shipped" },
+  { name: "sensible", url: "https://github.com/dominionthedev/sensible", tier: "shipped" },
+  { name: "tplate", url: "https://github.com/dominionthedev/tplate", tier: "shipped" },
+  { name: "neobar", url: "https://github.com/dominionthedev/neobar", tier: "in-progress" },
+];
+
+const tiers: { key: Tier; label: string }[] = [
+  { key: "shipped", label: "shipped" },
+  { key: "in-progress", label: "in progress" },
+];
+---
+
+<section class="stage-section" data-stage="projects" data-title="Projects">
+  <p class="label">Projects</p>
+  <h2 data-typed data-typed-text="What I've built and what's in progress.">
+  </h2>
+
+  <div class="project-tiers" data-reveal>
+    {
+      tiers.map((tier) => (
+        <div class="project-tier">
+          <p class="project-tier-label">
+            <span class={`tier-dot tier-dot--${tier.key}`} /> {tier.label}
+          </p>
+          <div class="project-list">
+            {projects
+              .filter((p) => p.tier === tier.key)
+              .map((p) => (
+                <a href={p.url} target="_blank" rel="noopener noreferrer" class="project-link link-underline">
+                  {p.name}
+                </a>
+              ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  h2 {
+    min-height: 1.3em;
+  }
+
+  .project-tiers {
+    margin-top: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .project-tier-label {
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--color-static);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .tier-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+  .tier-dot--shipped { background: var(--color-phosphor); }
+  .tier-dot--in-progress { background: var(--color-pulse); }
+
+  .project-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+  }
+
+  .project-link {
+    font-size: var(--text-terminal);
+    color: var(--color-signal);
+    font-weight: 600;
+  }
+</style>

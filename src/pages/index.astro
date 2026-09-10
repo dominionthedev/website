@@ -1,39 +1,25 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import WaypointNav from "../components/WaypointNav.astro";
-import RouteMeter from "../components/RouteMeter.astro";
 import BootOverlay from "../components/BootOverlay.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import Stage from "../components/Stage.astro";
 import Hero from "../components/sections/Hero.astro";
 import Philosophy from "../components/sections/Philosophy.astro";
-import TerminalSection from "../components/sections/TerminalSection.astro";
-import Work from "../components/sections/Work.astro";
+import Stack from "../components/sections/Stack.astro";
+import Projects from "../components/sections/Projects.astro";
 import Connect from "../components/sections/Connect.astro";
-
-const waypoints = [
-  { id: "hero", label: "start" },
-  { id: "philosophy", label: "philosophy" },
-  { id: "terminal", label: "how i work" },
-  { id: "work", label: "work" },
-  { id: "connect", label: "connect" },
-];
-
-const divider = "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈";
 ---
 
 <Layout>
   <BootOverlay />
-  <RouteMeter />
-  <WaypointNav waypoints={waypoints} />
-
-  <main class="tour">
+  <Navbar />
+  <Stage>
     <Hero />
-    <span class="section-divider" aria-hidden="true">{divider}</span>
     <Philosophy />
-    <span class="section-divider" aria-hidden="true">{divider}</span>
-    <TerminalSection />
-    <span class="section-divider" aria-hidden="true">{divider}</span>
-    <Work />
-    <span class="section-divider" aria-hidden="true">{divider}</span>
+    <Stack />
+    <Projects />
     <Connect />
-  </main>
+  </Stage>
+  <Footer />
 </Layout>

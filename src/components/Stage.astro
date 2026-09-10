@@ -1,0 +1,246 @@
+---
+---
+
+<div class="stage-shell">
+  <button class="stage-neighbor stage-neighbor--prev" id="prevName" aria-label="Previous section"></button>
+
+  <div class="stage-current" id="stageCurrent">
+    <slot />
+  </div>
+
+  <button class="stage-neighbor stage-neighbor--next" id="nextName" aria-label="Next section"></button>
+
+  <div class="stage-overlay" id="stageOverlay" aria-hidden="true">
+    <p class="stage-overlay-prompt"><span id="overlayPrompt"></span><span class="stage-overlay-cursor">_</span></p>
+  </div>
+</div>
+
+<style>
+  .stage-shell {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stage-neighbor {
+    background: none;
+    border: none;
+    font-family: var(--font);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--color-static);
+    opacity: 0.35;
+    cursor: pointer;
+    padding: var(--space-6) var(--space-8);
+    text-align: left;
+    transition: opacity var(--duration-base) var(--ease-smooth);
+  }
+  .stage-neighbor:hover {
+    opacity: 0.8;
+  }
+  .stage-neighbor:empty {
+    visibility: hidden;
+  }
+  .stage-neighbor--next {
+    text-align: right;
+  }
+
+  .stage-current {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    filter: blur(0);
+    transition: filter var(--duration-base) var(--ease-smooth);
+  }
+  .stage-current.is-blurred {
+    filter: blur(14px);
+  }
+
+  .stage-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 50;
+    transition: opacity var(--duration-base) var(--ease-smooth);
+  }
+  .stage-overlay.is-active {
+    opacity: 1;
+  }
+
+  .stage-overlay-prompt {
+    font-family: var(--font);
+    font-weight: 600;
+    font-size: var(--text-header);
+    color: var(--color-phosphor);
+    text-shadow: var(--glow-phosphor);
+    margin: 0;
+  }
+
+  .stage-overlay-cursor {
+    animation: blink 1s step-end infinite;
+    margin-left: 2px;
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
+  }
+
+  @media (max-width: 768px) {
+    .stage-neighbor {
+      padding: var(--space-4);
+      font-size: 0.7rem;
+    }
+  }
+</style>
+
+<script>
+  import { typeTransfigure, backspaceDelete } from "../lib/reveal";
+
+  type StageHandler = { enter?: () => Promise<void> | void; exit?: () => Promise<void> | void };
+  declare global {
+    interface Window {
+      __stageHandlers?: Record<string, StageHandler>;
+    }
+  }
+
+  function initStage() {
+    const sections = Array.from(document.querySelectorAll<HTMLElement>(".stage-section"));
+    const prevBtn = document.getElementById("prevName")!;
+    const nextBtn = document.getElementById("nextName")!;
+    const overlay = document.getElementById("stageOverlay")!;
+    const overlayPrompt = document.getElementById("overlayPrompt")!;
+    const current = document.getElementById("stageCurrent")!;
+    if (!sections.length) return;
+
+    let index = 0;
+    let busy = false;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function wait(ms: number) {
+      return new Promise((r) => setTimeout(r, ms));
+    }
+
+    function updateNeighbors() {
+      const prev = sections[index - 1];
+      const next = sections[index + 1];
+      prevBtn.textContent = prev ? `← ${prev.dataset.title}` : "";
+      nextBtn.textContent = next ? `${next.dataset.title} →` : "";
+      document.body.dataset.stage = sections[index].dataset.stage;
+    }
+
+    async function genericEnter(section: HTMLElement) {
+      const targets = Array.from(section.querySelectorAll<HTMLElement>("[data-typed]"));
+      for (const el of targets) {
+        const text = el.dataset.typedText ?? el.textContent ?? "";
+        el.textContent = "";
+        if (reduceMotion) {
+          el.textContent = text;
+        } else {
+          await typeTransfigure(el, text, { speed: 22, cyclesPerChar: 4 });
+        }
+      }
+      section.querySelectorAll<HTMLElement>("[data-reveal]").forEach((el) => {
+        el.classList.add("is-visible");
+      });
+    }
+
+    async function genericExit(section: HTMLElement) {
+      const targets = Array.from(section.querySelectorAll<HTMLElement>("[data-typed]")).reverse();
+      if (!reduceMotion) {
+        for (const el of targets) {
+          await backspaceDelete(el, 10);
+        }
+      }
+      section.querySelectorAll<HTMLElement>("[data-reveal]").forEach((el) => {
+        el.classList.remove("is-visible");
+      });
+    }
+
+    async function goTo(newIndex: number) {
+      if (busy || newIndex < 0 || newIndex >= sections.length || newIndex === index) return;
+      busy = true;
+
+      const outgoing = sections[index];
+      const incoming = sections[newIndex];
+      const handlers = window.__stageHandlers ?? {};
+
+      current.classList.add("is-blurred");
+      overlay.classList.add("is-active");
+      overlay.setAttribute("aria-hidden", "false");
+
+      const exitHandler = handlers[outgoing.dataset.stage ?? ""]?.exit;
+      await (exitHandler ? exitHandler() : genericExit(outgoing));
+
+      const cmd = `cd ${incoming.dataset.title?.toLowerCase()}`;
+      overlayPrompt.textContent = "";
+      if (reduceMotion) {
+        overlayPrompt.textContent = cmd;
+        await wait(200);
+      } else {
+        await typeTransfigure(overlayPrompt, cmd, { speed: 24, cyclesPerChar: 4 });
+        await wait(300);
+      }
+
+      outgoing.classList.remove("is-active");
+      incoming.classList.add("is-active");
+      index = newIndex;
+      updateNeighbors();
+
+      overlay.classList.remove("is-active");
+      overlay.setAttribute("aria-hidden", "true");
+      current.classList.remove("is-blurred");
+
+      const enterHandler = handlers[incoming.dataset.stage ?? ""]?.enter;
+      await (enterHandler ? enterHandler() : genericEnter(incoming));
+
+      busy = false;
+      window.dispatchEvent(new CustomEvent("stage:changed", { detail: { id: incoming.dataset.stage, index: newIndex, total: sections.length } }));
+    }
+
+    prevBtn.addEventListener("click", () => goTo(index - 1));
+    nextBtn.addEventListener("click", () => goTo(index + 1));
+
+    window.addEventListener("keydown", (e) => {
+      const tag = (document.activeElement?.tagName ?? "").toLowerCase();
+      if (tag === "input" || tag === "textarea") return;
+      if (e.key === "ArrowDown" || e.key === "ArrowRight") goTo(index + 1);
+      if (e.key === "ArrowUp" || e.key === "ArrowLeft") goTo(index - 1);
+    });
+
+    window.addEventListener("stage:goto", ((e: CustomEvent) => {
+      const target = sections.findIndex((s) => s.dataset.stage === e.detail?.id);
+      if (target !== -1) goTo(target);
+    }) as EventListener);
+
+    // Initial state
+    sections.forEach((s, i) => s.classList.toggle("is-active", i === 0));
+    updateNeighbors();
+
+    const handlers = window.__stageHandlers ?? {};
+    function bootFirstSection() {
+      const enterHandler = handlers[sections[0].dataset.stage ?? ""]?.enter;
+      if (enterHandler) enterHandler();
+      else genericEnter(sections[0]);
+    }
+
+    const bootOverlay = document.querySelector<HTMLElement>("[data-boot-overlay]");
+    if (bootOverlay?.dataset.hidden === "true") {
+      bootFirstSection();
+    } else {
+      window.addEventListener("dd:boot-complete", bootFirstSection, { once: true });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initStage);
+  } else {
+    initStage();
+  }
+</script>

@@ -24,10 +24,10 @@
   }
 
   .boot-lines {
-    font-family: var(--font-recursive);
-    font-variation-settings: var(--vf-terminal);
+    font-family: var(--font);
     font-size: var(--text-terminal);
     color: var(--color-phosphor);
+    text-shadow: var(--glow-phosphor);
     white-space: pre-wrap;
     max-width: 480px;
     width: 100%;
@@ -40,7 +40,8 @@
   const BOOT_LINES = [
     "booting dominiondev_os...",
     "loading philosophy.module ... ok",
-    "mounting /work ... ok",
+    "mounting /stack ... ok",
+    "mounting /projects ... ok",
     "spawning shell_",
   ];
 
@@ -69,7 +70,6 @@
     sessionStorage.setItem("dd-booted", "1");
     document.body.style.overflow = "hidden";
 
-    // Allow click/keypress to skip — never trap someone in a boot animation.
     overlay.addEventListener("click", finishNow, { once: true });
     window.addEventListener("keydown", finishNow, { once: true });
 

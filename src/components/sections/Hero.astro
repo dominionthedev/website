@@ -1,180 +1,28 @@
 ---
 ---
 
-<section id="hero" data-section="hero" class="section section--hero">
-  <span class="section-watermark" data-watermark="00" aria-hidden="true">00</span>
-  <p class="hero-wordmark">
-    <span data-scramble="wordmark" data-scramble-text="DOMINIONDEV"></span>
-  </p>
-  <h1 class="hero-thesis">
-    <span data-typewriter data-text="I live in the terminal"></span><span
-      class="hero-cursor"
-      aria-hidden="true">_</span
-    >
-  </h1>
-  <p class="hero-sub">A tour, not a resume.</p>
+<section class="stage-section" data-stage="hero" data-title="Start" data-align="center">
+  <h1 class="hero-thesis" data-typed data-typed-text="I live in the terminal"></h1>
+  <p class="hero-sub" data-reveal>A tour, not a resume.</p>
 </section>
-
-<script>
-  import { scrambleType, typeText } from "../../lib/reveal";
-
-  function wait(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  async function revealHeroExtras() {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const wordmarkWrap = document.querySelector<HTMLElement>(".hero-wordmark");
-    const wordmarkEl = document.querySelector<HTMLElement>('[data-scramble="wordmark"]');
-    const thesisWrap = document.querySelector<HTMLElement>(".hero-thesis");
-    const thesisEl = document.querySelector<HTMLElement>("[data-typewriter]");
-    const subEl = document.querySelector<HTMLElement>(".hero-sub");
-
-    if (reduceMotion) {
-      if (wordmarkEl) wordmarkEl.textContent = wordmarkEl.dataset.scrambleText ?? "";
-      wordmarkWrap?.classList.add("is-settled");
-      if (thesisEl) thesisEl.textContent = thesisEl.dataset.text ?? "";
-      thesisWrap?.classList.add("is-visible");
-      subEl?.classList.add("is-visible");
-      return;
-    }
-
-    // 1. DominionDev decodes in large and centered — it briefly owns the
-    // hero.
-    if (wordmarkEl) {
-      await scrambleType(wordmarkEl, wordmarkEl.dataset.scrambleText ?? "", {
-        speed: 26,
-        cyclesPerChar: 4,
-      });
-      await wait(500);
-    }
-
-    // 2. It glitches into its permanent top-left corner — an abrupt digital
-    // relocation, not a graceful float.
-    wordmarkWrap?.classList.add("is-glitching");
-    wordmarkWrap?.classList.add("is-settled");
-    await wait(280);
-    wordmarkWrap?.classList.remove("is-glitching");
-
-    // 3. The actual tagline — "I live in the terminal" — types out. The
-    // cursor is visible from the moment typing starts and never moves
-    // again once it's done.
-    thesisWrap?.classList.add("is-visible");
-    await wait(150);
-    if (thesisEl) {
-      await typeText(thesisEl, thesisEl.dataset.text ?? "", 44);
-    }
-
-    // 4. The sub-line just appears. No cursor — it was never a terminal
-    // line, just a caption.
-    await wait(350);
-    subEl?.classList.add("is-visible");
-  }
-
-  function onBootDone() {
-    revealHeroExtras();
-  }
-
-  // The boot overlay may resolve synchronously (repeat session, reduced
-  // motion) before this script's listener attaches — check its actual
-  // resolved state directly instead of trusting the event alone.
-  const overlay = document.querySelector<HTMLElement>("[data-boot-overlay]");
-  if (overlay?.dataset.hidden === "true") {
-    onBootDone();
-  } else {
-    window.addEventListener("dd:boot-complete", onBootDone, { once: true });
-  }
-</script>
 
 <style>
   .hero-thesis {
-    opacity: 0;
-    transition: opacity 500ms var(--ease-smooth);
+    font-size: var(--text-display);
+    min-height: 1.2em;
   }
 
-  .hero-thesis.is-visible {
-    opacity: 1;
-  }
-
-  .hero-wordmark {
-    position: absolute;
-    top: 42%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin: 0;
-    font-family: var(--font-recursive);
-    font-variation-settings: "MONO" 1, "CASL" 0;
-    font-weight: 900;
-    font-size: clamp(2.25rem, 5.5vw, 3.5rem);
-    letter-spacing: 0.04em;
-    color: var(--color-signal);
-    white-space: nowrap;
-    z-index: 2;
-    transition: top 260ms cubic-bezier(0.3, 0.9, 0.3, 1),
-      left 260ms cubic-bezier(0.3, 0.9, 0.3, 1),
-      transform 260ms cubic-bezier(0.3, 0.9, 0.3, 1),
-      font-size 260ms cubic-bezier(0.3, 0.9, 0.3, 1),
-      letter-spacing 260ms cubic-bezier(0.3, 0.9, 0.3, 1);
-  }
-
-  .hero-wordmark.is-settled {
-    top: var(--space-6);
-    left: 0;
-    transform: translate(0, 0);
-    font-size: 1rem;
-    letter-spacing: 0.12em;
-  }
-
-  /* The glitch — an abrupt relocation, not a float. Uses the site's own
-     two accents (pulse/phosphor) as the split channels instead of stock
-     RGB, so it reads as "this site" glitching, not a generic effect. */
-  .hero-wordmark.is-glitching {
-    animation: wordmark-glitch 260ms steps(2, jump-none) 1;
-  }
-
-  @keyframes wordmark-glitch {
-    0% { text-shadow: none; opacity: 1; }
-    12% { text-shadow: -3px 0 var(--color-pulse), 3px 0 var(--color-phosphor); opacity: 0.75; }
-    24% { text-shadow: 2px 0 var(--color-pulse), -2px 0 var(--color-phosphor); opacity: 1; }
-    36% { text-shadow: none; }
-    48% { text-shadow: -2px 0 var(--color-phosphor), 2px 0 var(--color-pulse); opacity: 0.8; }
-    60% { text-shadow: none; opacity: 1; }
-    75% { text-shadow: 1px 0 var(--color-pulse), -1px 0 var(--color-phosphor); }
-    100% { text-shadow: none; opacity: 1; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .hero-wordmark.is-glitching {
-      animation: none;
-    }
-  }
-
-  .hero-cursor {
+  .hero-thesis::after {
+    content: "_";
     color: var(--color-phosphor);
-    font-family: var(--font-recursive);
-    font-variation-settings: var(--vf-terminal);
-    font-weight: 600;
     animation: blink 1.1s step-end infinite;
     margin-left: 2px;
   }
 
   .hero-sub {
-    font-family: var(--font-recursive);
-    font-variation-settings: var(--vf-terminal);
+    font-family: var(--font);
     font-size: var(--text-terminal);
     color: var(--color-static);
-    opacity: 0;
-    transition: opacity 500ms var(--ease-smooth);
-  }
-
-  .hero-sub.is-visible {
-    opacity: 1;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .hero-cursor {
-      animation: none;
-      opacity: 1;
-    }
+    margin-top: var(--space-3);
   }
 </style>

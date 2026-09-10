@@ -1,19 +1,13 @@
 ---
 ---
 
-<section id="philosophy" data-section="philosophy" class="section">
-  <span class="section-watermark" data-watermark="01" aria-hidden="true">01</span>
-  <p class="label reveal">01 — philosophy</p>
-  <h2 class="reveal">How I think.</h2>
+<section class="stage-section" data-stage="philosophy" data-title="Philosophy">
+  <p class="label">Philosophy</p>
+  <h2>How I think.</h2>
   <div class="philosophy-list">
-    <p class="philosophy-line reveal">
-      <span class="prompt">&gt;</span> Stylishness isn't something you look at. It's how
-      I say exactly what I feel.
-    </p>
-    <p class="philosophy-line reveal">
-      <span class="prompt">&gt;</span> A limit is not a stop. It's a challenge.
-    </p>
-    <p class="philosophy-proof reveal">
+    <p class="philosophy-line" data-typed data-typed-text="Stylishness isn't something you look at. It's how I say exactly what I feel."></p>
+    <p class="philosophy-line" data-typed data-typed-text="A limit is not a stop. It's a challenge."></p>
+    <p class="philosophy-proof" data-reveal>
       RunBox exists because a 4GB MacBook Air on macOS 11 couldn't run Docker. So
       instead of waiting for better hardware, I built around the limit.
     </p>
@@ -31,18 +25,15 @@
   .philosophy-line {
     font-size: var(--text-header);
     line-height: 1.4;
+    min-height: 1.4em;
   }
 
-  .philosophy-line .prompt {
-    font-family: var(--font-recursive);
-    font-variation-settings: var(--vf-terminal);
+  .philosophy-line::before {
+    content: "> ";
     color: var(--color-phosphor);
-    margin-right: var(--space-2);
   }
 
   .philosophy-proof {
-    font-family: var(--font-recursive);
-    font-variation-settings: var(--vf-quote);
     font-size: var(--text-terminal);
     color: var(--color-static);
     line-height: var(--leading-terminal);
@@ -50,8 +41,4 @@
     border-left: 1px solid oklch(55% 0.02 295 / 0.3);
     margin-top: var(--space-2);
   }
-
-  .philosophy-list .reveal:nth-child(1) { transition-delay: 0ms; }
-  .philosophy-list .reveal:nth-child(2) { transition-delay: 80ms; }
-  .philosophy-list .reveal:nth-child(3) { transition-delay: 160ms; }
 </style>

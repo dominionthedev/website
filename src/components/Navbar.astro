@@ -1,0 +1,194 @@
+---
+const navItems = [
+  { id: "philosophy", label: "philosophy" },
+  { id: "stack", label: "stack" },
+  { id: "projects", label: "projects" },
+  { id: "connect", label: "connect" },
+];
+---
+
+<nav class="navbar">
+  <button class="navbar-title" id="navTitle" data-typed data-typed-text="DOMINIONDEV" aria-label="Home"></button>
+  <div class="navbar-links" id="navLinks">
+    {
+      navItems.map((item) => (
+        <button class="navbar-link" data-goto={item.id}>
+          {item.label}
+        </button>
+      ))
+    }
+  </div>
+</nav>
+
+<style>
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-8);
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--duration-base) var(--ease-smooth);
+  }
+
+  .navbar.is-settled {
+    border-bottom-color: oklch(55% 0.02 295 / 0.2);
+  }
+
+  .navbar-title {
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: fixed;
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font);
+    font-weight: 800;
+    font-size: clamp(2.25rem, 5.5vw, 3.5rem);
+    letter-spacing: 0.04em;
+    color: var(--color-signal);
+    white-space: nowrap;
+    z-index: 41;
+    transition: top 260ms cubic-bezier(0.3, 0.9, 0.3, 1), left 260ms cubic-bezier(0.3, 0.9, 0.3, 1),
+      transform 260ms cubic-bezier(0.3, 0.9, 0.3, 1), font-size 260ms cubic-bezier(0.3, 0.9, 0.3, 1),
+      letter-spacing 260ms cubic-bezier(0.3, 0.9, 0.3, 1);
+  }
+
+  .navbar-title.is-settled {
+    top: var(--space-4);
+    left: var(--space-8);
+    transform: translate(0, 0);
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+  }
+
+  .navbar-title.is-glitching {
+    animation: navbar-glitch 260ms steps(2, jump-none) 1;
+  }
+
+  @keyframes navbar-glitch {
+    0% { text-shadow: none; opacity: 1; }
+    12% { text-shadow: -3px 0 var(--color-pulse), 3px 0 var(--color-phosphor); opacity: 0.75; }
+    24% { text-shadow: 2px 0 var(--color-pulse), -2px 0 var(--color-phosphor); opacity: 1; }
+    36% { text-shadow: none; }
+    48% { text-shadow: -2px 0 var(--color-phosphor), 2px 0 var(--color-pulse); opacity: 0.8; }
+    60% { text-shadow: none; opacity: 1; }
+    75% { text-shadow: 1px 0 var(--color-pulse), -1px 0 var(--color-phosphor); }
+    100% { text-shadow: none; opacity: 1; }
+  }
+
+  .navbar-links {
+    display: flex;
+    gap: var(--space-6);
+  }
+
+  .navbar-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--color-static);
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity var(--duration-base) var(--ease-smooth),
+      transform var(--duration-base) var(--ease-smooth), color var(--duration-fast) linear;
+  }
+
+  .navbar-link.is-visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .navbar-link:hover {
+    color: var(--color-signal);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .navbar-title.is-glitching {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .navbar-links {
+      gap: var(--space-3);
+    }
+    .navbar-link {
+      font-size: 0.65rem;
+    }
+  }
+</style>
+
+<script>
+  import { typeTransfigure, colorSlide } from "../lib/reveal";
+
+  function wait(ms: number) {
+    return new Promise((r) => setTimeout(r, ms));
+  }
+
+  async function runNavbarIntro() {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const title = document.getElementById("navTitle")!;
+    const navbar = document.querySelector<HTMLElement>(".navbar")!;
+    const links = Array.from(document.querySelectorAll<HTMLElement>(".navbar-link"));
+
+    if (reduceMotion) {
+      title.textContent = title.dataset.typedText ?? "";
+      title.classList.add("is-settled");
+      navbar.classList.add("is-settled");
+      links.forEach((l) => l.classList.add("is-visible"));
+      return;
+    }
+
+    // 1. The title decodes in large and centered — it owns the screen first.
+    await typeTransfigure(title, title.dataset.typedText ?? "", { speed: 26, cyclesPerChar: 4 });
+    await wait(450);
+
+    // 2. It glitches into its permanent header slot.
+    title.classList.add("is-glitching");
+    title.classList.add("is-settled");
+    navbar.classList.add("is-settled");
+    await wait(280);
+    title.classList.remove("is-glitching");
+
+    // 3. Nav items emerge from that same point — smooth slide, then a
+    // color-slide sweep through each label.
+    for (const link of links) {
+      link.classList.add("is-visible");
+      await wait(80);
+      colorSlide(link, { color: "var(--color-phosphor)", speed: 18 });
+    }
+  }
+
+  function initNavbar() {
+    document.getElementById("navTitle")?.addEventListener("click", () => {
+      window.dispatchEvent(new CustomEvent("stage:goto", { detail: { id: "hero" } }));
+    });
+    document.querySelectorAll<HTMLElement>(".navbar-link").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        window.dispatchEvent(new CustomEvent("stage:goto", { detail: { id: btn.dataset.goto } }));
+      });
+    });
+
+    const overlay = document.querySelector<HTMLElement>("[data-boot-overlay]");
+    if (overlay?.dataset.hidden === "true") {
+      runNavbarIntro();
+    } else {
+      window.addEventListener("dd:boot-complete", runNavbarIntro, { once: true });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initNavbar);
+  } else {
+    initNavbar();
+  }
+</script>

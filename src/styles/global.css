@@ -1,12 +1,13 @@
-@import "tailwindcss";
-
 /* ============================================================
-   DESIGN TOKENS — Night-Drive Terminal
-   Two accents that never touch: pulse (feeling) / phosphor (precision)
+   DESIGN TOKENS v2
+   One typeface (Maple Mono). Hierarchy through scale, weight,
+   spacing, color, and motion — not multiple fonts, not variable
+   axis registers. The OKLCH palette and two-accent restraint
+   (pulse/phosphor never touch) carry over unchanged.
    ============================================================ */
 
 :root {
-  /* Color — OKLCH native */
+  /* Color — unchanged */
   --color-void: oklch(15% 0.03 295);
   --color-surface: oklch(20% 0.035 295);
   --color-signal: oklch(94% 0.02 295);
@@ -14,31 +15,14 @@
   --color-phosphor: oklch(85% 0.22 155);
   --color-static: oklch(55% 0.02 295);
 
-  /* Type — one variable font (Recursive), five registers dialed by axis,
-     not two typefaces pretending to relate. MONO: 0=proportional, 1=full
-     monospace. CASL: 0=precise/linear, 1=rounded/casual. */
-  --font-recursive: "Recursive Variable", ui-monospace, monospace;
+  /* Type — one family, weight/scale carry hierarchy */
+  --font: "Maple Mono", ui-monospace, monospace;
 
-  /* terminal / code / commands — full precision, faint warmth so it
-     doesn't read as robotic */
-  --vf-terminal: "MONO" 1, "CASL" 0.15;
-  /* display / section headers — mostly-mono with real presence */
-  --vf-display: "MONO" 0.8, "CASL" 0.35;
-  /* UI / labels / waypoint nav — coldest register, pure data */
-  --vf-label: "MONO" 1, "CASL" 0;
-  /* body / prose — dialed OFF mono entirely for reading comfort, still
-     warm */
-  --vf-body: "MONO" 0, "CASL" 0.3;
-  /* philosophy proof / quotes — the literal midpoint between terminal
-     and prose. impossible with two separate typefaces; this register
-     only exists because it's one axis, not two fonts. */
-  --vf-quote: "MONO" 0.5, "CASL" 0.45;
-
-  --text-display: clamp(3.25rem, 7vw, 5.5rem);
-  --text-header: clamp(2.25rem, 4.5vw, 2.9rem);
-  --text-body: 1.1875rem;
-  --text-label: 0.875rem;
-  --text-terminal: 1.0625rem;
+  --text-display: clamp(3rem, 6.5vw, 5rem);
+  --text-header: clamp(2rem, 4vw, 2.6rem);
+  --text-body: 1.0625rem;
+  --text-label: 0.8125rem;
+  --text-terminal: 1rem;
 
   --tracking-tight: -0.02em;
   --tracking-wide: 0.08em;
@@ -52,7 +36,7 @@
   --duration-base: 300ms;
   --duration-slow: 700ms;
 
-  /* Spacing (4px base grid) */
+  /* Spacing */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -60,10 +44,9 @@
   --space-6: 1.5rem;
   --space-8: 2rem;
   --space-12: 3rem;
-  --space-16: 5rem;
-  --space-24: 7.5rem;
+  --space-16: 4.5rem;
+  --space-24: 7rem;
 
-  /* Effects */
   --glow-pulse: 0 0 24px oklch(65% 0.25 350 / 0.35);
   --glow-phosphor: 0 0 20px oklch(85% 0.22 155 / 0.3);
   --grain-opacity: 0.025;
@@ -76,101 +59,56 @@
 html {
   background: var(--color-void);
   color-scheme: dark;
-  scroll-behavior: smooth;
-  scroll-snap-type: y proximity;
-  scrollbar-width: none;
-}
-
-html::-webkit-scrollbar {
-  display: none;
 }
 
 body {
   background: var(--color-void);
   color: var(--color-signal);
-  font-family: var(--font-recursive);
-  font-variation-settings: var(--vf-body);
-  font-weight: 380;
+  font-family: var(--font);
+  font-weight: 400;
   font-size: var(--text-body);
   line-height: var(--leading-body);
   margin: 0;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   position: relative;
 }
 
-/* Ambient wash — a slow, low-key color bleed keyed to the active section.
-   Fixed behind everything, big soft radial, barely there but it kills the
-   flat-void feeling between sections. */
+/* Ambient wash — breathes slowly, keyed to the active section */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(
-    circle at 15% 50%,
-    oklch(20% 0.035 295 / 0.6) 0%,
-    transparent 60%
-  );
-  opacity: 0;
+  background: radial-gradient(circle at 15% 50%, oklch(20% 0.035 295 / 0.6) 0%, transparent 60%);
+  opacity: 1;
   animation: breathe 8s ease-in-out infinite;
-  transition:
-    opacity 900ms var(--ease-smooth),
-    background 900ms var(--ease-smooth);
+  transition: background 900ms var(--ease-smooth);
 }
 
 @keyframes breathe {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.06);
-  }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
 }
 
-body[data-active-section="hero"]::before {
-  opacity: 1;
-  background: radial-gradient(
-    circle at 20% 40%,
-    oklch(30% 0.05 155 / 0.5) 0%,
-    transparent 55%
-  );
+body[data-stage="hero"]::before {
+  background: radial-gradient(circle at 20% 40%, oklch(30% 0.05 155 / 0.5) 0%, transparent 55%);
 }
-body[data-active-section="philosophy"]::before {
-  opacity: 1;
-  background: radial-gradient(
-    circle at 80% 30%,
-    oklch(28% 0.06 350 / 0.4) 0%,
-    transparent 55%
-  );
+body[data-stage="philosophy"]::before {
+  background: radial-gradient(circle at 80% 30%, oklch(28% 0.06 350 / 0.4) 0%, transparent 55%);
 }
-body[data-active-section="terminal"]::before {
-  opacity: 1;
-  background: radial-gradient(
-    circle at 15% 60%,
-    oklch(30% 0.05 155 / 0.45) 0%,
-    transparent 55%
-  );
+body[data-stage="stack"]::before {
+  background: radial-gradient(circle at 15% 60%, oklch(30% 0.05 155 / 0.45) 0%, transparent 55%);
 }
-body[data-active-section="work"]::before {
-  opacity: 1;
-  background: radial-gradient(
-    circle at 85% 40%,
-    oklch(25% 0.04 295 / 0.5) 0%,
-    transparent 60%
-  );
+body[data-stage="projects"]::before {
+  background: radial-gradient(circle at 85% 40%, oklch(25% 0.04 295 / 0.5) 0%, transparent 60%);
 }
-body[data-active-section="connect"]::before {
-  opacity: 1;
-  background: radial-gradient(
-    circle at 20% 50%,
-    oklch(28% 0.06 350 / 0.4) 0%,
-    transparent 55%
-  );
+body[data-stage="connect"]::before {
+  background: radial-gradient(circle at 20% 50%, oklch(28% 0.06 350 / 0.4) 0%, transparent 55%);
 }
 
-/* Ambient film grain — texture, not motion. Static, ~2.5% opacity. */
+/* Grain — flickers like film, not a static filter */
 body::after {
   content: "";
   position: fixed;
@@ -184,43 +122,22 @@ body::after {
 }
 
 @keyframes grain-flicker {
-  0% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(-1%, 1%);
-  }
-  50% {
-    transform: translate(1%, -1%);
-  }
-  75% {
-    transform: translate(-1%, -1%);
-  }
-  100% {
-    transform: translate(0, 0);
-  }
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-1%, 1%); }
+  50% { transform: translate(1%, -1%); }
+  75% { transform: translate(-1%, -1%); }
+  100% { transform: translate(0, 0); }
 }
 
-h1,
-h2,
-h3 {
-  font-family: var(--font-recursive);
-  font-variation-settings: var(--vf-display);
-  font-weight: 650;
+h1, h2, h3 {
+  font-family: var(--font);
+  font-weight: 700;
   letter-spacing: var(--tracking-tight);
   margin: 0;
 }
 
-h1 {
-  font-size: var(--text-display);
-}
-h2 {
-  font-size: var(--text-header);
-}
-
 .label {
-  font-family: var(--font-recursive);
-  font-variation-settings: var(--vf-label);
+  font-family: var(--font);
   font-weight: 500;
   font-size: var(--text-label);
   letter-spacing: var(--tracking-wide);
@@ -252,121 +169,52 @@ a {
   transform: scaleX(1);
 }
 
-.reveal {
-  opacity: 0;
-  transform: translateY(10px) scale(0.98);
-  transition:
-    opacity var(--duration-slow) var(--ease-smooth),
-    transform var(--duration-slow) var(--ease-smooth);
-}
-.reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
+.cs-char {
+  transition: color 120ms linear;
 }
 
-/* Shared section layout — used by every section component, so it lives
-   here rather than being duplicated per-component. */
-.tour {
-  max-width: 780px;
-  margin: 0 auto;
-  padding-left: calc(var(--space-24) + 12px);
-}
-
-.section {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
+/* Base positioning for every stage section — only .is-active is visible.
+   Alignment (left/center/right) is each section's own decision, set via
+   its own scoped modifier class, not dictated here. */
+.stage-section {
+  position: absolute;
+  inset: 0;
+  display: none;
   flex-direction: column;
   justify-content: center;
-  gap: var(--space-6);
-  padding: var(--space-16) var(--space-6);
-  overflow: hidden;
-  scroll-snap-align: start;
-  opacity: 1;
-  filter: brightness(1);
-  transition:
-    opacity 500ms var(--ease-smooth),
-    filter 500ms var(--ease-smooth);
+  padding: var(--space-16) var(--space-8);
+  max-width: 900px;
 }
 
-.section.is-dimmed {
-  opacity: 0.4;
-  filter: brightness(0.7);
+.stage-section.is-active {
+  display: flex;
 }
 
-.section-watermark {
-  position: absolute;
-  top: -0.15em;
-  right: var(--space-4);
-  font-family: var(--font-recursive);
-  font-variation-settings: var(--vf-display);
-  font-size: 13rem;
-  font-weight: 700;
-  line-height: 1;
-  color: oklch(94% 0.02 295 / 0.04);
-  pointer-events: none;
-  user-select: none;
-  z-index: 0;
-}
-
-.section > *:not(.section-watermark) {
-  position: relative;
-  z-index: 1;
-}
-
-.section-divider {
-  display: block;
-  text-align: center;
-  font-family: var(--font-recursive);
-  font-variation-settings: var(--vf-label);
-  font-size: 0.7rem;
-  letter-spacing: 0.15em;
-  color: oklch(55% 0.02 295 / 0.25);
-  padding: var(--space-4) 0;
-  max-width: 780px;
+.stage-section[data-align="center"] {
   margin: 0 auto;
-  overflow: hidden;
-  white-space: nowrap;
+  text-align: center;
+  align-items: center;
+}
+.stage-section[data-align="right"] {
+  margin-left: auto;
+  text-align: right;
+  align-items: flex-end;
 }
 
-.section--hero {
-  gap: var(--space-3);
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity var(--duration-slow) var(--ease-smooth),
+    transform var(--duration-slow) var(--ease-smooth);
 }
-
-.section--work {
-  min-height: auto;
-  justify-content: flex-start;
-  padding-top: var(--space-24);
-  padding-bottom: var(--space-24);
-}
-
-@keyframes blink {
-  0%,
-  45% {
-    opacity: 1;
-  }
-  50%,
-  95% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@media (max-width: 768px) {
-  .section-watermark {
-    font-size: 7rem;
-  }
-  .tour {
-    padding-left: calc(var(--space-12) + 4px);
-  }
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }

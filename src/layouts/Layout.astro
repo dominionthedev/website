@@ -1,5 +1,8 @@
 ---
-import "@fontsource-variable/recursive/full.css";
+import "@fontsource/maple-mono/400.css";
+import "@fontsource/maple-mono/500.css";
+import "@fontsource/maple-mono/600.css";
+import "@fontsource/maple-mono/800.css";
 import "../styles/global.css";
 
 interface Props {
@@ -7,10 +10,7 @@ interface Props {
   description?: string;
 }
 
-const {
-  title = "DominionDev",
-  description = "A tour of DominionDev — philosophy, process, and work.",
-} = Astro.props;
+const { title = "DominionDev", description = "A tour of DominionDev." } = Astro.props;
 ---
 
 <!doctype html>
@@ -19,18 +19,9 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>{title}</title>
   </head>
   <body>
     <slot />
-    <script define:vars={{ title }}>
-      let original = document.title;
-      document.addEventListener("visibilitychange", () => {
-        document.title = document.hidden ? "~$ come back_" : original;
-      });
-    </script>
   </body>
 </html>
