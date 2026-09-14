@@ -12,8 +12,13 @@ allowlist = ["registry.npmjs.org:443", "github.com:443"]
 dns = "localhost-only"
 
 [permissions]
-read = ["/Users/appleplay/.local", "/opt/local", "/usr/local/bin"]
-write = []
+read = [
+  "/Users/appleplay/.local",
+  "/opt/local",
+  "/usr/local/bin",
+  "/Users/appleplay/.config",
+]
+write = ["/Users/appleplay/.local", "/Users/appleplay/.config"]
 
 [env]
 path_extra = [
@@ -23,4 +28,11 @@ path_extra = [
   "/Users/appleplay/.local/bin",
   "/Users/appleplay/.local/share/nvm/versions/node/v22.23.2/bin",
 ]
-set = { NVM_DIR = "/Users/appleplay/.local/share/nvm" }
+set = { NVM_DIR = "/Users/appleplay/.local/share/nvm", XDG_CONFIG_HOME = "$HOME/.config", XDG_DATA_HOME = "$HOME/.local/share", XDG_CACHE_HOME = "$HOME/.cache", BAT_THEME = "Catppuccin-mocha", BAT_STYLE = "changes,numbers", EDITOR = "nvim", VISUAL = "nvim", PAGER = "bat", MANPAGER = "bat -l man -p", COLORTERM = "truecolor", EZA_CONFIG_DIR = "/Users/appleplay/.config/eza" }
+
+[setup]
+provision = [
+  { src = "/Users/appleplay/Developer/github/site/.runbox/setup/.zshrc", dest = ".zshrc" },
+]
+commands = ["npm ci"]
+# script = "./.runbox/setup/setup.sh"
